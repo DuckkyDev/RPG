@@ -4,6 +4,7 @@ import duckky.rpg.entity.Player;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class GamePanel extends JPanel implements Runnable {
     //SCREEN SETTINGS
@@ -84,10 +85,10 @@ public class GamePanel extends JPanel implements Runnable {
         g2.dispose();
     }
 
-//    public void drawImage(BufferedImage image, double x, double y, Graphics2D g2){
-//        g2.drawImage(image,(int)x*tileSize,(int)y*tileSize,tileSize,tileSize,null);
-//    }
-//    public void drawImage(BufferedImage image, double x, double y, double widthMultiplier,double heightMultiplier,Graphics2D g2){
-//        g2.drawImage(image,(int)x*tileSize,(int)y*tileSize, (int) (tileSize*widthMultiplier),(int) (tileSize*widthMultiplier),null);
-//    }
+    public void drawImage(BufferedImage image, double x, double y, Graphics2D g2){
+        g2.drawImage(image,(int) (x*tileSize),(int) (y*tileSize),tileSize,tileSize,null);
+    }
+    public void drawImage(BufferedImage image, double x, double y, double widthMultiplier,double heightMultiplier,Graphics2D g2){
+        g2.drawImage(image,(int) (x*tileSize),(int) (y*tileSize), (int) (tileSize*widthMultiplier),(int) (tileSize*widthMultiplier),null);
+    }
 }

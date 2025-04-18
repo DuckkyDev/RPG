@@ -19,19 +19,17 @@ public class Player extends Entity{
         setDefaultValue();
     }
     public void setDefaultValue(){
-        x = 100;
-        y = 100;
+        x = 2;
+        y = 2;
         speed = 6; //Tiles per second
         direction = Direction.DOWN;
-
-        speed *= gp.tileSize;
     }
     public void tick(){
         boolean isMoving;
         double secondsPerUpdate = 1.0 / gp.FPS;
 
         // Calculate the distance to move in this single update step
-        int distance = (int) (speed * secondsPerUpdate);
+        double distance = speed * secondsPerUpdate;
 
         if (keyH.upPressed) {
             direction = Direction.UP;
@@ -74,7 +72,6 @@ public class Player extends Entity{
             case LEFT -> image = spriteSheet.getSprite(spriteNumber-1,1);
             case RIGHT -> image = spriteSheet.getSprite(spriteNumber-1,0);
         }
-        g2.drawImage(image,x,y,gp.tileSize,gp.tileSize,null);
-        //gp.drawImage(image,x,y,g2);
+        gp.drawImage(image,x,y,g2);
     }
 }
