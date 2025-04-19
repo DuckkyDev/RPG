@@ -10,13 +10,13 @@ import java.awt.image.BufferedImage;
 public class GamePanel extends JPanel implements Runnable {
     //SCREEN SETTINGS
     public final int originalTileSize = 16;
-    public final int scale = 3;
+    public final double scale = 3;
 
-    public final int tileSize = originalTileSize*scale;
+    public final int tileSize = (int) (originalTileSize*scale);
     public final int maxScreenColumn = 16;
     public final int maxScreenRow = 12;
-    public final int screenWidth = tileSize * maxScreenColumn;
-    public final int screenHeight = tileSize * maxScreenRow;
+    public final int screenWidth = (tileSize * maxScreenColumn);
+    public final int screenHeight = (tileSize * maxScreenRow);
 
     TileManager tileManager = new TileManager(this);
     KeyHandler keyH = new KeyHandler();
@@ -33,6 +33,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.setDoubleBuffered(true);
         this.addKeyListener(keyH);
         this.setFocusable(true);
+        tileManager.loadMap("/maps/map01.txt");
     }
 
     public void startGameThread(){
@@ -82,7 +83,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         Graphics2D g2 = (Graphics2D)g;
 
-        tileManager.loadMap(g2);
+        tileManager.render(g2);
         player.render(g2);
 
         g2.dispose();
