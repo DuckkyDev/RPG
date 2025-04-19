@@ -10,16 +10,16 @@ import java.awt.image.BufferedImage;
 public class GamePanel extends JPanel implements Runnable {
     //SCREEN SETTINGS
     public final int originalTileSize = 16;
-    public final double scale = 3;
+    public double scale = 3;
 
-    public final int tileSize = (int) (originalTileSize*scale);
+    public int tileSize = (int) (originalTileSize*scale);
     public final int maxScreenColumn = 16;
     public final int maxScreenRow = 12;
     public final int screenWidth = (tileSize * maxScreenColumn);
     public final int screenHeight = (tileSize * maxScreenRow);
 
     TileManager tileManager = new TileManager(this);
-    KeyHandler keyH = new KeyHandler();
+    KeyHandler keyH = new KeyHandler(this);
     Thread gameThread;
 
     Player player = new Player(this,keyH);
@@ -88,11 +88,26 @@ public class GamePanel extends JPanel implements Runnable {
 
         g2.dispose();
     }
+    public void drawImage(BufferedImage image, double x, double y, Graphics2D g2) {
+        // Calculate the screen coordinates
+        int screenX = (int) (((x - player.camX) * tileSize) + (screenWidth / 2.0) - (tileSize / 2.0));
+        int screenY = (int) (((y - player.camY) * tileSize) + (screenHeight / 2.0) - (tileSize / 2.0));
 
-    public void drawImage(BufferedImage image, double x, double y, Graphics2D g2){
-        g2.drawImage(image,(int) (x*tileSize),(int) (y*tileSize),tileSize,tileSize,null);
+        // Check if the image is within the screen bounds
+        if (screenX + tileSize > 0 &&
+                screenX < screenWidth &&
+                screenY + tileSize > 0 &&
+                screenY < screenHeight) {
+            g2.drawImage(image, screenX, screenY, tileSize, tileSize, null);
+        }
     }
-    public void drawImage(BufferedImage image, double x, double y, double widthMultiplier,double heightMultiplier,Graphics2D g2){
-        g2.drawImage(image,(int) (x*tileSize),(int) (y*tileSize), (int) (tileSize*widthMultiplier),(int) (tileSize*widthMultiplier),null);
+    public void zoom(int i){
+        if (i > 1) {
+            scale += 0.2; // Update the scale
+            tileSize = (int) (originalTileSize * scale); // Recalculate tileSize
+        } else {
+            scale -= 0.2; // Update the scale
+            tileSize = (int) (originalTileSize * scale); // Recalculate tileSize
+        }
     }
 }

@@ -12,6 +12,9 @@ public class Player extends Entity{
     KeyHandler keyH;
     SpriteSheet spriteSheet = new SpriteSheet("/player/player_sprite_sheet.png");
 
+    public double camX;
+    public double camY;
+
     public Player(GamePanel gp, KeyHandler keyH) {
         this.gp = gp;
         this.keyH = keyH;
@@ -23,6 +26,13 @@ public class Player extends Entity{
         y = 2;
         speed = 6; //Tiles per second
         direction = Direction.DOWN;
+
+        camX = x;
+        camY = y;
+    }
+    public void moveCamera(){
+        camX = x;
+        camY = y;
     }
     public void tick(){
         boolean isMoving;
@@ -30,7 +40,7 @@ public class Player extends Entity{
 
         // Calculate the distance to move in this single update step
         double distance = speed * secondsPerUpdate;
-
+        moveCamera();
         if (keyH.upPressed) {
             direction = Direction.UP;
             y -= distance;
