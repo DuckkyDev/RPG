@@ -38,13 +38,16 @@ public class KeyHandler implements KeyListener {
         }
 
         // Zoom in (Ctrl + Plus)
-        if(ctrlPressed && code == KeyEvent.VK_EQUALS){ // VK_EQUALS is usually the '+' key without shift
-            gp.zoom(2); // Assuming zoom(2) zooms in
+        if(ctrlPressed && code == KeyEvent.VK_EQUALS){
+            gp.zoom(2);
         }
 
         // Zoom out (Ctrl + Minus)
         if (ctrlPressed && code == KeyEvent.VK_MINUS) {
-            gp.zoom(1); // Assuming zoom(1) zooms out (or resets to default)
+            gp.zoom(1);
+        }
+        if (ctrlPressed && code == KeyEvent.VK_0) {
+            gp.zoom(0);
         }
     }
 

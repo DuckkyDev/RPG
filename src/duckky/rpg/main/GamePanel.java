@@ -10,7 +10,8 @@ import java.awt.image.BufferedImage;
 public class GamePanel extends JPanel implements Runnable {
     //SCREEN SETTINGS
     public final int originalTileSize = 16;
-    public double scale = 3;
+    public final int defaultScale = 3;
+    public double scale = defaultScale;
 
     public int tileSize = (int) (originalTileSize*scale);
     public final int maxScreenColumn = 16;
@@ -85,14 +86,11 @@ public class GamePanel extends JPanel implements Runnable {
 
         tileManager.render(g2);
         player.render(g2);
-
-        g2.dispose();
     }
     public void drawImage(BufferedImage image, double x, double y, Graphics2D g2) {
         // Calculate the screen coordinates
-        int screenX = (int) (((x - player.camX) * tileSize) + (screenWidth / 2.0) - (tileSize / 2.0));
-        int screenY = (int) (((y - player.camY) * tileSize) + (screenHeight / 2.0) - (tileSize / 2.0));
-
+        int screenX = (int) Math.round(((x - player.camX) * tileSize) + (screenWidth / 2.0) - (tileSize / 2.0));
+        int screenY = (int) Math.round(((y - player.camY) * tileSize) + (screenHeight / 2.0) - (tileSize / 2.0));
         // Check if the image is within the screen bounds
         if (screenX + tileSize > 0 &&
                 screenX < screenWidth &&
@@ -102,12 +100,16 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
     public void zoom(int i){
-        if (i > 1) {
-            scale += 0.2; // Update the scale
-            tileSize = (int) (originalTileSize * scale); // Recalculate tileSize
+        if (i == 2) {
+            scale += 0.1;
+        } else if(i == 1){
+            scale -= 0.1;
         } else {
-            scale -= 0.2; // Update the scale
-            tileSize = (int) (originalTileSize * scale); // Recalculate tileSize
+            scale = defaultScale;
         }
+        if (scale < 1){
+            scale = 1;
+        }
+        tileSize = (int) (originalTileSize * scale);
     }
 }
