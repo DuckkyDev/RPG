@@ -2,15 +2,18 @@ package duckky.rpg.tile;
 
 import duckky.rpg.gfx.SpriteSheet;
 
+import java.awt.image.BufferedImage;
+
 public class Tile {
     SpriteSheet tileset;
+    BufferedImage image;
 
-    private int x;
-    private int y;
+    int x;
+    int y;
+    public boolean collision;
 
-    private boolean collision = false;
-
-    public int getX(){return x;}
-    public int getY(){return y;}
-    public boolean collide(){return collision;}
+    public Tile(SpriteSheet tileset,int x, int y, boolean collision){
+        image = tileset.getSprite(x,y);
+        this.collision = collision;
+    }
 }

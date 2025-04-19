@@ -1,6 +1,7 @@
 package duckky.rpg.main;
 
 import duckky.rpg.entity.Player;
+import duckky.rpg.tile.TileManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,6 +18,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int screenWidth = tileSize * maxScreenColumn;
     public final int screenHeight = tileSize * maxScreenRow;
 
+    TileManager tileManager = new TileManager(this);
     KeyHandler keyH = new KeyHandler();
     Thread gameThread;
 
@@ -80,6 +82,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         Graphics2D g2 = (Graphics2D)g;
 
+        tileManager.loadMap(g2);
         player.render(g2);
 
         g2.dispose();
