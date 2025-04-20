@@ -25,8 +25,8 @@ public class GamePanel extends JPanel implements Runnable {
 
     Player player = new Player(this,keyH);
 
-    public int targetFPS = 60;
-    public int FPS = 60;
+    public int targetFPS = 30;
+    public int FPS = targetFPS;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
@@ -40,6 +40,7 @@ public class GamePanel extends JPanel implements Runnable {
     public void startGameThread(){
         gameThread = new Thread(this);
         gameThread.start();
+
     }
 
     @Override
