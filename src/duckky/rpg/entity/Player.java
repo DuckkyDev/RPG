@@ -41,36 +41,54 @@ public class Player extends Entity{
         // Calculate the distance to move in this single update step
         double distance = speed * secondsPerUpdate;
         moveCamera();
-        if (keyH.upPressed) {
+
+        isMoving = false;
+        double moveX = 0;
+        double moveY = 0;
+        if(keyH.upPressed){
+            moveY -= 1;
             direction = Direction.UP;
-            y -= distance;
             isMoving = true;
-        } else if (keyH.downPressed) {
-            direction = Direction.DOWN;
-            y += distance;
-            isMoving = true;
-        } else if (keyH.leftPressed) {
-            direction = Direction.LEFT;
-            x -= distance;
-            isMoving = true;
-        } else if (keyH.rightPressed) {
-            direction = Direction.RIGHT;
-            x += distance;
-            isMoving = true;
-        } else {
-            isMoving = false;
         }
+        if(keyH.downPressed){
+            moveY += 1;
+            direction = Direction.DOWN;
+            isMoving = true;
+        }
+        if(keyH.rightPressed){
+            moveX += 1;
+            direction = Direction.RIGHT;
+            isMoving = true;
+        }
+        if(keyH.leftPressed){
+            moveX -= 1;
+            direction = Direction.LEFT;
+            isMoving = true;
+        }
+
+        if(moveX != 0 && moveY != 0){
+            double diagonalFactor = 1 / Math.sqrt(moveX * moveX + moveY * moveY);
+            moveX *= diagonalFactor;
+            moveY *= diagonalFactor;
+        }
+
+        x += moveX * distance;
+        y += moveY * distance;
 
         int animationInterval = gp.FPS / 8; // Calculate how many frames should pass per sprite change
 
         spriteCounter++;
-        if (spriteCounter >= animationInterval && isMoving) {
+        if (spriteCounter >= animationInterval) {
             if(spriteNumber<8){
                 spriteNumber++;
             } else {
                 spriteNumber = 1;
             }
             spriteCounter = 0;
+        }
+        if(!isMoving){
+            spriteCounter = 0;
+            spriteNumber = 1;
         }
     }
     public void render(Graphics2D g2){
