@@ -73,7 +73,7 @@ public class TileManager {
     public void render(Graphics2D g2){
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
-                gp.drawImage(tile[map[i][j]].image,j,i,g2);
+                gp.drawImage(tile[map[i][j]].image,j*gp.originalTileSize,i*gp.originalTileSize,g2);
             }
         }
     }

@@ -1,9 +1,9 @@
 package duckky.rpg.entity;
 
 public class Entity {
-    public double x;
-    public double y;
-    public double speed;
+    public int x;
+    public int y;
+    public int speed;
 
     public enum Direction{
             UP,DOWN,LEFT,RIGHT

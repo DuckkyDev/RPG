@@ -12,8 +12,8 @@ public class Player extends Entity{
     KeyHandler keyH;
     SpriteSheet spriteSheet = new SpriteSheet("/player/player_sprite_sheet.png");
 
-    public double camX;
-    public double camY;
+    public int camX;
+    public int camY;
 
     public Player(GamePanel gp, KeyHandler keyH) {
         this.gp = gp;
@@ -22,9 +22,9 @@ public class Player extends Entity{
         setDefaultValue();
     }
     public void setDefaultValue(){
-        x = 2;
-        y = 2;
-        speed = 6; //Tiles per second
+        x = 32;
+        y = 32;
+        speed = 96; //Pixels per second
         direction = Direction.DOWN;
 
         camX = x;
@@ -72,8 +72,8 @@ public class Player extends Entity{
             moveY *= diagonalFactor;
         }
 
-        x += moveX * distance;
-        y += moveY * distance;
+        x += (int) (moveX * distance);
+        y += (int) (moveY * distance);
 
         int animationInterval = gp.FPS / 8; // Calculate how many frames should pass per sprite change
 

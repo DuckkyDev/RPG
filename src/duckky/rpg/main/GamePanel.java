@@ -87,11 +87,12 @@ public class GamePanel extends JPanel implements Runnable {
 
         tileManager.render(g2);
         player.render(g2);
+        g2.dispose();
     }
-    public void drawImage(BufferedImage image, double x, double y, Graphics2D g2) {
+    public void drawImage(BufferedImage image, int x, int y, Graphics2D g2) {
         // Calculate the screen coordinates
-        int screenX = (int) Math.round(((x - player.camX) * tileSize) + (screenWidth / 2.0) - (tileSize / 2.0));
-        int screenY = (int) Math.round(((y - player.camY) * tileSize) + (screenHeight / 2.0) - (tileSize / 2.0));
+        int screenX = ((int) (Math.round((x - player.camX)*scale))) + (screenWidth / 2) - (tileSize / 2);
+        int screenY = ((int) (Math.round((y - player.camY)*scale))) + (screenHeight / 2) - (tileSize / 2);
         // Check if the image is within the screen bounds
         if (screenX + tileSize > 0 &&
                 screenX < screenWidth &&
@@ -102,9 +103,9 @@ public class GamePanel extends JPanel implements Runnable {
     }
     public void zoom(int i){
         if (i == 2) {
-            scale += 0.1;
+            scale += 0.25;
         } else if(i == 1){
-            scale -= 0.1;
+            scale -= 0.25;
         } else {
             scale = defaultScale;
         }
