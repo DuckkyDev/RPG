@@ -71,7 +71,7 @@ public class Player extends Entity{
 
             // Move X
             int nextX = x + (int)(moveX);
-            if(checkCollision(nextX, y)) {
+            if(canWalk(nextX, y)) {
                 x = nextX;
             } else {
                 snapBackX(moveX > 0);
@@ -79,7 +79,7 @@ public class Player extends Entity{
 
             // Move Y
             int nextY = y + (int)(moveY);
-            if(checkCollision(x, nextY)) {
+            if(canWalk(x, nextY)) {
                 y = nextY;
             } else {
                 snapBackY(moveY > 0);
@@ -89,42 +89,66 @@ public class Player extends Entity{
     private void snapBackX(boolean movingRight) {
         // step one pixel at a time until you're just outside the wall
         int sign = movingRight ? 1 : -1;
-        // as soon as checkCollision(x+sign, y) is true, we know x is right against the wall
-        while(checkCollision(x + sign, y)) {
+        // as soon as canWalk(x+sign, y) is true, we know x is right against the wall
+        while(canWalk(x + sign, y)) {
             x += sign;
         }
     }
     private void snapBackY(boolean movingDown) {
         int sign = movingDown ? 1 : -1;
-        while(checkCollision(x, y + sign)) {
+        while(canWalk(x, y + sign)) {
             y += sign;
         }
     }
-    public boolean checkCollision(int nextX, int nextY){
-        int spriteTopLeftX = nextX - (gp.originalTileSize / 2); // Assuming 16x16 original size
-        int spriteTopLeftY = nextY - (gp.originalTileSize / 2);
+    public boolean canWalk(int nextX, int nextY){
+        int tileSize = gp.originalTileSize;
+
+        int spriteTopLeftX = nextX - (tileSize / 2);
+        int spriteTopLeftY = nextY - (tileSize / 2);
 
         int leftX = spriteTopLeftX + hitbox.x;
         int topY = spriteTopLeftY + hitbox.y;
-        int rightX = leftX + hitbox.width;   // Left edge + width
-        int bottomY = topY + hitbox.height;  // Top edge + height
+        int rightX = leftX + hitbox.width;
+        int bottomY = topY + hitbox.height;
 
-        int leftCol = leftX / gp.originalTileSize;
-        int topRow = topY / gp.originalTileSize;
-        int rightCol = (rightX-1) / gp.originalTileSize;
-        int bottomRow = (bottomY-1) / gp.originalTileSize;
+        int leftCol = leftX / tileSize;
+        int rightCol = (rightX - 1) / tileSize;
+        int topRow = topY / tileSize;
+        int bottomRow = (bottomY - 1) / tileSize;
 
-        int tileNumTopLeft = gp.tileManager.map[topRow][leftCol];
-        int tileNumTopRight = gp.tileManager.map[topRow][rightCol];
-        int tileNumBottomLeft = gp.tileManager.map[bottomRow][leftCol];
-        int tileNumBottomRight = gp.tileManager.map[bottomRow][rightCol];
+        Rectangle playerBox = new Rectangle(leftX, topY, hitbox.width, hitbox.height);
 
-        // Check Bottom-Right tile
-        return !gp.tileManager.tile[tileNumTopLeft].collision &&      // Check Top-Left tile
-                !gp.tileManager.tile[tileNumTopRight].collision &&     // Check Top-Right tile
-                !gp.tileManager.tile[tileNumBottomLeft].collision &&   // Check Bottom-Left tile
-                !gp.tileManager.tile[tileNumBottomRight].collision;   // Check Bottom-Right tile
+        for (int row = topRow; row <= bottomRow; row++) {
+            for (int col = leftCol; col <= rightCol; col++) {
+                if (row < 0 || col < 0 || row >= gp.tileManager.map.length || col >= gp.tileManager.map[0].length) {
+                    continue; // skip out-of-bounds tiles
+                }
+
+                int tileNum = gp.tileManager.map[row][col];
+                Rectangle tileBox = gp.tileManager.tile[tileNum].collisionBox;
+
+                if (tileBox != null) {
+                    int tileWorldX = col * tileSize;
+                    int tileWorldY = row * tileSize;
+
+                    Rectangle worldTileBox = new Rectangle(
+                            tileWorldX + tileBox.x,
+                            tileWorldY + tileBox.y,
+                            tileBox.width,
+                            tileBox.height
+                    );
+
+                    if (playerBox.intersects(worldTileBox)) {
+                        System.out.println("Collision!!!");
+                        return false;
+                    }
+                }
+            }
+        }
+        System.out.println("no Collision");
+        return true;
     }
+
     public void tick(){
         moveCamera();
 

@@ -25,10 +25,10 @@ public class TileManager {
 
     }
     public void createTiles(){
-        tile[0] = new Tile(tileset,7,7,false); //Empty
-        tile[1] = new Tile(tileset,0,0,false); //Grass
-        tile[2] = new Tile(tileset,1,0,false); //Dirt
-        tile[3] = new Tile(tileset,3,0,true); //Wall TEMPORARY
+        tile[0] = new Tile(tileset,7,7,null); //Empty
+        tile[1] = new Tile(tileset,0,0,null); //Grass
+        tile[2] = new Tile(tileset,1,0,null); //Dirt
+        tile[3] = new Tile(tileset,3,0,new Rectangle(0,0,16,16)); //Wall TEMPORARY
     }
     public void loadMap(String path) {
         try {

@@ -2,6 +2,7 @@ package duckky.rpg.tile;
 
 import duckky.rpg.gfx.SpriteSheet;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Tile {
@@ -10,10 +11,10 @@ public class Tile {
 
     int x;
     int y;
-    public boolean collision;
+    public Rectangle collisionBox;
 
-    public Tile(SpriteSheet tileset,int x, int y, boolean collision){
+    public Tile(SpriteSheet tileset,int x, int y, Rectangle collisionBox){
         image = tileset.getSprite(x,y);
-        this.collision = collision;
+        this.collisionBox = collisionBox;
     }
 }
