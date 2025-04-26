@@ -12,8 +12,8 @@ import java.util.List;
 
 public class TileManager {
     GamePanel gp;
-    Tile[] tile;
-    int[][] map;
+    public Tile[] tile;
+    public int[][] map;
     final int amountOfTiles = 15;
     SpriteSheet tileset = new SpriteSheet("/tiles/tiles.png");
 
@@ -28,7 +28,7 @@ public class TileManager {
         tile[0] = new Tile(tileset,7,7,false); //Empty
         tile[1] = new Tile(tileset,0,0,false); //Grass
         tile[2] = new Tile(tileset,1,0,false); //Dirt
-        tile[3] = new Tile(tileset,3,0,false); //Wall TEMPORARY
+        tile[3] = new Tile(tileset,3,0,true); //Wall TEMPORARY
     }
     public void loadMap(String path) {
         try {

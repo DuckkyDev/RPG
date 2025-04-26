@@ -15,9 +15,12 @@ public class Player extends Entity{
     public int camX;
     public int camY;
 
+    boolean isMoving;
+
     public Player(GamePanel gp, KeyHandler keyH) {
         this.gp = gp;
         this.keyH = keyH;
+        hitbox = new Rectangle(4,10,7,5);
 
         setDefaultValue();
     }
@@ -27,24 +30,19 @@ public class Player extends Entity{
         speed = 96; //Pixels per second
         direction = Direction.DOWN;
 
-        camX = x;
-        camY = y;
+        moveCamera();
     }
     public void moveCamera(){
         camX = x;
         camY = y;
     }
-    public void tick(){
-        boolean isMoving;
+    public void tryMove(){
         double secondsPerUpdate = 1.0 / gp.FPS;
-
-        // Calculate the distance to move in this single update step
         double distance = speed * secondsPerUpdate;
-        moveCamera();
 
-        isMoving = false;
         double moveX = 0;
         double moveY = 0;
+
         if(keyH.upPressed){
             moveY -= 1;
             direction = Direction.UP;
@@ -66,14 +64,73 @@ public class Player extends Entity{
             isMoving = true;
         }
 
-        if(moveX != 0 && moveY != 0){
+        if(moveX != 0 || moveY != 0) {
             double diagonalFactor = 1 / Math.sqrt(moveX * moveX + moveY * moveY);
-            moveX *= diagonalFactor;
-            moveY *= diagonalFactor;
-        }
+            moveX *= diagonalFactor * distance;
+            moveY *= diagonalFactor * distance;
 
-        x += (int) (moveX * distance);
-        y += (int) (moveY * distance);
+            // Move X
+            int nextX = x + (int)(moveX);
+            if(checkCollision(nextX, y)) {
+                x = nextX;
+            } else {
+                snapBackX(moveX > 0);
+            }
+
+            // Move Y
+            int nextY = y + (int)(moveY);
+            if(checkCollision(x, nextY)) {
+                y = nextY;
+            } else {
+                snapBackY(moveY > 0);
+            }
+        }
+    }
+    private void snapBackX(boolean movingRight) {
+        // step one pixel at a time until you're just outside the wall
+        int sign = movingRight ? 1 : -1;
+        // as soon as checkCollision(x+sign, y) is true, we know x is right against the wall
+        while(checkCollision(x + sign, y)) {
+            x += sign;
+        }
+    }
+    private void snapBackY(boolean movingDown) {
+        int sign = movingDown ? 1 : -1;
+        while(checkCollision(x, y + sign)) {
+            y += sign;
+        }
+    }
+    public boolean checkCollision(int nextX, int nextY){
+        int spriteTopLeftX = nextX - (gp.originalTileSize / 2); // Assuming 16x16 original size
+        int spriteTopLeftY = nextY - (gp.originalTileSize / 2);
+
+        int leftX = spriteTopLeftX + hitbox.x;
+        int topY = spriteTopLeftY + hitbox.y;
+        int rightX = leftX + hitbox.width;   // Left edge + width
+        int bottomY = topY + hitbox.height;  // Top edge + height
+
+        int leftCol = leftX / gp.originalTileSize;
+        int topRow = topY / gp.originalTileSize;
+        int rightCol = (rightX-1) / gp.originalTileSize;
+        int bottomRow = (bottomY-1) / gp.originalTileSize;
+
+        int tileNumTopLeft = gp.tileManager.map[topRow][leftCol];
+        int tileNumTopRight = gp.tileManager.map[topRow][rightCol];
+        int tileNumBottomLeft = gp.tileManager.map[bottomRow][leftCol];
+        int tileNumBottomRight = gp.tileManager.map[bottomRow][rightCol];
+
+        // Check Bottom-Right tile
+        return !gp.tileManager.tile[tileNumTopLeft].collision &&      // Check Top-Left tile
+                !gp.tileManager.tile[tileNumTopRight].collision &&     // Check Top-Right tile
+                !gp.tileManager.tile[tileNumBottomLeft].collision &&   // Check Bottom-Left tile
+                !gp.tileManager.tile[tileNumBottomRight].collision;   // Check Bottom-Right tile
+    }
+    public void tick(){
+        moveCamera();
+
+        isMoving = false;
+
+        tryMove();
 
         int animationInterval = gp.FPS / 8; // Calculate how many frames should pass per sprite change
 
@@ -100,6 +157,10 @@ public class Player extends Entity{
             case LEFT -> image = spriteSheet.getSprite(spriteNumber-1,1);
             case RIGHT -> image = spriteSheet.getSprite(spriteNumber-1,0);
         }
-        gp.drawImage(image,x,y,g2);
+        gp.drawImage(image,x - 8,y - 8,g2);
+        //drawHitbox(g2);
+    }
+    public void drawHitbox(Graphics2D g2) {
+        gp.drawRect(x-8+hitbox.x,y-8+hitbox.y,hitbox.width,hitbox.height,Color.red,g2);
     }
 }

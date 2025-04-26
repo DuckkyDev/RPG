@@ -19,7 +19,7 @@ public class GamePanel extends JPanel implements Runnable {
     public final int screenWidth = (tileSize * maxScreenColumn);
     public final int screenHeight = (tileSize * maxScreenRow);
 
-    TileManager tileManager = new TileManager(this);
+    public TileManager tileManager = new TileManager(this);
     KeyHandler keyH = new KeyHandler(this);
     Thread gameThread;
 
@@ -91,14 +91,33 @@ public class GamePanel extends JPanel implements Runnable {
     }
     public void drawImage(BufferedImage image, int x, int y, Graphics2D g2) {
         // Calculate the screen coordinates
-        int screenX = ((int) (Math.round((x - player.camX)*scale))) + (screenWidth / 2) - (tileSize / 2);
-        int screenY = ((int) (Math.round((y - player.camY)*scale))) + (screenHeight / 2) - (tileSize / 2);
+        int screenX = ((int) (Math.round((x - player.camX)*scale))) + (screenWidth / 2);
+        int screenY = ((int) (Math.round((y - player.camY)*scale))) + (screenHeight / 2);
         // Check if the image is within the screen bounds
         if (screenX + tileSize > 0 &&
                 screenX < screenWidth &&
                 screenY + tileSize > 0 &&
                 screenY < screenHeight) {
             g2.drawImage(image, screenX, screenY, tileSize, tileSize, null);
+        }
+    }
+    public void drawRect(int x, int y, int width, int height, Color color, Graphics2D g2) {
+
+        int screenX = ((int) (Math.round((x - player.camX) * scale))) + (screenWidth / 2);
+        int screenY = ((int) (Math.round((y - player.camY) * scale))) + (screenHeight / 2);
+
+        int scaledWidth = (int) Math.round(width * scale);
+        int scaledHeight = (int) Math.round(height * scale);
+
+        scaledWidth = Math.max(1, scaledWidth);
+        scaledHeight = Math.max(1, scaledHeight);
+
+        if (screenX + scaledWidth > 0 &&
+                screenX < screenWidth &&
+                screenY + scaledHeight > 0 &&
+                screenY < screenHeight) {
+            g2.setColor(color);
+            g2.drawRect(screenX, screenY, scaledWidth, scaledHeight);
         }
     }
     public void zoom(int i){
