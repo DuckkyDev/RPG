@@ -35,14 +35,17 @@ public class Player extends Entity{
     public void moveCamera(){
         camX = x;
         camY = y;
+        if(gp.editor.isActive){
+            camX += (int) ((gp.editor.paletteWidth / gp.scale)/2);
+        }
     }
     public void tryMove(){
-        double secondsPerUpdate = 1.0 / gp.FPS;
+        double secondsPerUpdate = 1.0 / gp.targetFPS;
         double distance = speed * secondsPerUpdate;
 
         double moveX = 0;
         double moveY = 0;
-
+        if(gp.editor.isActive&&gp.keyH.mouseX>gp.editor.paletteX){return;}
         if(keyH.upPressed){
             moveY -= 1;
             direction = Direction.UP;
@@ -100,7 +103,7 @@ public class Player extends Entity{
             y += sign;
         }
     }
-    public boolean canWalk(int nextX, int nextY){
+    public boolean canWalk(int nextX, int nextY) {
         int tileSize = gp.originalTileSize;
 
         int spriteTopLeftX = nextX - (tileSize / 2);
@@ -120,11 +123,12 @@ public class Player extends Entity{
 
         for (int row = topRow; row <= bottomRow; row++) {
             for (int col = leftCol; col <= rightCol; col++) {
-                if (row < 0 || col < 0 || row >= gp.tileManager.map.length || col >= gp.tileManager.map[0].length) {
-                    continue; // skip out-of-bounds tiles
+                if (row < 0 || col < 0 || row >= gp.tileManager.map1.length || col >= gp.tileManager.map1[0].length) {
+                    continue;
                 }
 
-                int tileNum = gp.tileManager.map[row][col];
+                int tileNum = gp.tileManager.getTileIndexAtWorldPosition(col * tileSize, row * tileSize, 2);
+
                 Rectangle tileBox = gp.tileManager.tile[tileNum].collisionBox;
 
                 if (tileBox != null) {
@@ -139,15 +143,14 @@ public class Player extends Entity{
                     );
 
                     if (playerBox.intersects(worldTileBox)) {
-                        System.out.println("Collision!!!");
                         return false;
                     }
                 }
             }
         }
-        System.out.println("no Collision");
         return true;
     }
+
 
     public void tick(){
         moveCamera();
@@ -156,7 +159,7 @@ public class Player extends Entity{
 
         tryMove();
 
-        int animationInterval = gp.FPS / 8; // Calculate how many frames should pass per sprite change
+        int animationInterval = gp.targetFPS / 8; // Calculate how many frames should pass per sprite change
 
         spriteCounter++;
         if (spriteCounter >= animationInterval) {

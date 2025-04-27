@@ -1,5 +1,6 @@
 package duckky.rpg.main;
 
+import duckky.rpg.editor.Editor;
 import duckky.rpg.entity.Player;
 import duckky.rpg.tile.TileManager;
 
@@ -20,21 +21,29 @@ public class GamePanel extends JPanel implements Runnable {
     public final int screenHeight = (tileSize * maxScreenRow);
 
     public TileManager tileManager = new TileManager(this);
-    KeyHandler keyH = new KeyHandler(this);
+    public KeyHandler keyH = new KeyHandler(this);
     Thread gameThread;
 
-    Player player = new Player(this,keyH);
+    public Editor editor = new Editor(this);
+
+    public Player player = new Player(this,keyH);
 
     public int targetFPS = 30;
     public int FPS = targetFPS;
+
+    public int tick = 0;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
         this.setBackground(Color.DARK_GRAY);
         this.setDoubleBuffered(true);
+
         this.addKeyListener(keyH);
+        this.addMouseMotionListener(keyH);
+        this.addMouseListener(keyH);
+
         this.setFocusable(true);
-        tileManager.loadMap("/maps/map01.txt");
+        tileManager.loadMap("map01");
     }
 
     public void startGameThread(){
@@ -68,7 +77,7 @@ public class GamePanel extends JPanel implements Runnable {
             }
             if(timer >= 1000000000){
                 FPS = drawCount;
-                System.out.println("FPS: " + FPS);
+                //System.out.println("FPS: " + FPS);
                 drawCount = 0;
                 timer = 0;
             }
@@ -77,7 +86,9 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void tick() {
+        tick+=1;
         player.tick();
+        editor.tick();
     }
 
     public void paintComponent(Graphics g){
@@ -85,14 +96,17 @@ public class GamePanel extends JPanel implements Runnable {
 
         Graphics2D g2 = (Graphics2D)g;
 
-        tileManager.render(g2);
+        tileManager.renderBehind(g2);
         player.render(g2);
+        tileManager.renderInFront(g2);
+        editor.render(g2);
+
         g2.dispose();
     }
     public void drawImage(BufferedImage image, int x, int y, Graphics2D g2) {
         // Calculate the screen coordinates
-        int screenX = ((int) (Math.round((x - player.camX)*scale))) + (screenWidth / 2);
-        int screenY = ((int) (Math.round((y - player.camY)*scale))) + (screenHeight / 2);
+        int screenX = convertToWorldX(x);
+        int screenY = convertToWorldY(y);
         // Check if the image is within the screen bounds
         if (screenX + tileSize > 0 &&
                 screenX < screenWidth &&
@@ -103,8 +117,8 @@ public class GamePanel extends JPanel implements Runnable {
     }
     public void drawRect(int x, int y, int width, int height, Color color, Graphics2D g2) {
 
-        int screenX = ((int) (Math.round((x - player.camX) * scale))) + (screenWidth / 2);
-        int screenY = ((int) (Math.round((y - player.camY) * scale))) + (screenHeight / 2);
+        int screenX = convertToWorldX(x);
+        int screenY = convertToWorldY(y);
 
         int scaledWidth = (int) Math.round(width * scale);
         int scaledHeight = (int) Math.round(height * scale);
@@ -119,6 +133,12 @@ public class GamePanel extends JPanel implements Runnable {
             g2.setColor(color);
             g2.drawRect(screenX, screenY, scaledWidth, scaledHeight);
         }
+    }
+    public int convertToWorldX(int x){
+        return ((int) (Math.round((x - player.camX) * scale))) + (screenWidth / 2);
+    }
+    public int convertToWorldY(int y){
+        return ((int) (Math.round((y - player.camY) * scale))) + (screenHeight / 2);
     }
     public void zoom(int i){
         if (i == 2) {
