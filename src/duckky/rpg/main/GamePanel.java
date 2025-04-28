@@ -31,7 +31,7 @@ public class GamePanel extends JPanel implements Runnable {
     public int targetFPS = 30;
     public int FPS = targetFPS;
 
-    public int tick = 0;
+    public int tickCount = 0;
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
@@ -43,7 +43,6 @@ public class GamePanel extends JPanel implements Runnable {
         this.addMouseListener(keyH);
 
         this.setFocusable(true);
-        tileManager.loadMap("map01");
     }
 
     public void startGameThread(){
@@ -86,21 +85,20 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void tick() {
-        tick+=1;
+        tickCount+=1;
         player.tick();
         editor.tick();
     }
-
-    public void paintComponent(Graphics g){
-        super.paintComponent(g);
-
-        Graphics2D g2 = (Graphics2D)g;
-
+    public void render(Graphics2D g2) {
         tileManager.renderBehind(g2);
         player.render(g2);
         tileManager.renderInFront(g2);
         editor.render(g2);
-
+    }
+    public void paintComponent(Graphics g){
+        super.paintComponent(g);
+        Graphics2D g2 = (Graphics2D)g;
+        render(g2);
         g2.dispose();
     }
     public void drawImage(BufferedImage image, int x, int y, Graphics2D g2) {

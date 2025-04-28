@@ -123,11 +123,7 @@ public class Player extends Entity{
 
         for (int row = topRow; row <= bottomRow; row++) {
             for (int col = leftCol; col <= rightCol; col++) {
-                if (row < 0 || col < 0 || row >= gp.tileManager.map1.length || col >= gp.tileManager.map1[0].length) {
-                    continue;
-                }
-
-                int tileNum = gp.tileManager.getTileIndexAtWorldPosition(col * tileSize, row * tileSize, 2);
+                int tileNum = gp.tileManager.map.getTile(col * tileSize, row * tileSize, 2);
 
                 Rectangle tileBox = gp.tileManager.tile[tileNum].collisionBox;
 

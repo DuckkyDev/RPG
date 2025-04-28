@@ -83,16 +83,11 @@ public class Editor {
         int mouseX = keyHandler.mouseX;
         int mouseY = keyHandler.mouseY;
 
-        double worldX = gp.player.camX + (mouseX - gp.screenWidth  / 2.0) * (1.0 / gp.scale);
-        double worldY = gp.player.camY + (mouseY - gp.screenHeight  / 2.0) * (1.0 / gp.scale);
+        int worldX = (int) (gp.player.camX + (mouseX - gp.screenWidth  / 2.0) * (1.0 / gp.scale));
+        int worldY = (int) (gp.player.camY + (mouseY - gp.screenHeight  / 2.0) * (1.0 / gp.scale));
 
-        int column = (int) (worldX / gp.originalTileSize);
-        int row = (int) (worldY / gp.originalTileSize);
-        if (keyHandler.leftMousePressed &&
-                row    >= 0 && row    < gp.tileManager.map1.length &&
-                column >= 0 && column < gp.tileManager.map1[0].length)
-        {
-            gp.tileManager.setTile(column,row,selectedLayer,selectedTile);
+        if (keyHandler.leftMousePressed){
+            gp.tileManager.map.setTile(worldX,worldY,selectedTile,selectedLayer);
         }
     }
     public void saveMap(){
@@ -123,7 +118,7 @@ public class Editor {
         }
     }
     public void tick(){
-        if(gp.keyH.mouseX>paletteX && isActive && gp.tick % 2 == 0){
+        if(gp.keyH.mouseX>paletteX && isActive && gp.tickCount % 2 == 0){
             if(gp.keyH.upPressed){
                 amountMovedY -= 1;
             }
