@@ -35,7 +35,7 @@ public class Player extends Entity{
     public void moveCamera(){
         camX = x;
         camY = y;
-        if(gp.editor.isActive){
+        if(gp.editor.isActive()){
             camX += (int) ((gp.editor.paletteWidth / gp.scale)/2);
         }
     }
@@ -45,7 +45,7 @@ public class Player extends Entity{
 
         double moveX = 0;
         double moveY = 0;
-        if(gp.editor.isActive&&gp.keyH.mouseX>gp.editor.paletteX){return;}
+        if(gp.editor.isActive()&&gp.keyH.mouseX>gp.editor.paletteX){return;}
         if(keyH.upPressed){
             moveY -= 1;
             direction = Direction.UP;

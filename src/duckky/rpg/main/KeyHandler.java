@@ -50,9 +50,9 @@ public class KeyHandler implements KeyListener, MouseListener,MouseMotionListene
             gp.zoom(0);
         }
         if(code == KeyEvent.VK_BACK_QUOTE){
-            gp.editor.isActive = !gp.editor.isActive;
+            gp.editor.setActive(!gp.editor.isActive());
         }
-        if(gp.editor.isActive){
+        if(gp.editor.isActive()){
             if(code == KeyEvent.VK_1){
                 gp.editor.selectedLayer = 1;
             }

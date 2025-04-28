@@ -3,8 +3,13 @@ package duckky.rpg.tile.map;
 import duckky.rpg.main.GamePanel;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +56,13 @@ public class Map {
         }
         return layer.getTile(x, y);
     }
-
+    private Layer getLayer(int LayerNum){
+        return switch (LayerNum) {
+            case 1 -> layer1;
+            case 2 -> layer2;
+            default -> layer3;
+        };
+    }
     public void loadMap() {
         int[][] map;
         try {
@@ -105,6 +116,36 @@ public class Map {
         } catch (Exception e) {
             System.err.println("Error loading map: " + e.getMessage());
         }
+    }
+    public void saveMap(){
+        try{
+            Path base = Paths.get(System.getProperty("user.dir"),
+                    "res", "maps", mapName);
+            if (!Files.exists(base)) {
+                Files.createDirectories(base);
+            }
+
+            // for each layer 1–3
+            for (int layerNum = 1; layerNum <= 3; layerNum++) {
+                Layer layer = getLayer(layerNum);
+                Path out = base.resolve("layer" + layerNum + ".txt");
+
+                try (BufferedWriter bw = Files.newBufferedWriter(out,
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING)) {
+                    for (int row = 0; row < layer.height(); row++) {
+                        for (int col = 0; col < layer.width(); col++) {
+                            bw.write(Integer.toString(layer.getTile(col*gp.originalTileSize,row*gp.originalTileSize)));
+                            if (col < layer.width() - 1) bw.write(' ');
+                        }
+                        bw.newLine();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
     public int height(){
         return layer1.height();

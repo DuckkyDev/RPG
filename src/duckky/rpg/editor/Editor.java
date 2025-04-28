@@ -4,6 +4,7 @@ import duckky.rpg.gfx.SpriteSheet;
 import duckky.rpg.main.GamePanel;
 import duckky.rpg.main.KeyHandler;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -20,7 +21,14 @@ public class Editor {
     int saveImageSize;
     boolean saveImageClicked = false;
 
-    public boolean isActive = false;
+    boolean runningFromJar = Editor.class
+            .getProtectionDomain()
+            .getCodeSource()
+            .getLocation()
+            .getPath()
+            .endsWith(".jar");
+
+    private boolean active = false;
     public int selectedTile = 0;
     public int selectedLayer = 1;
 
@@ -54,6 +62,14 @@ public class Editor {
         saveImageY = gp.screenHeight - 32 - 5;
         saveImageSize = 32;
     }
+    public boolean isActive(){
+        return active;
+    }
+    public void setActive(boolean newValue){
+        if(!runningFromJar){
+            active = newValue;
+        }
+    }
     public void selectTile(){
         if(!keyHandler.leftMousePressed){
             return;
@@ -62,7 +78,7 @@ public class Editor {
         int mouseX = keyHandler.mouseX;
         int mouseY = keyHandler.mouseY;
 
-        if(isActive && mouseX > paletteX && mouseX < paletteX + paletteWidth) {
+        if(active && mouseX > paletteX && mouseX < paletteX + paletteWidth) {
             int relX = mouseX - paletteX - paletteOffset;
             int relY = mouseY - paletteOffset;
 
@@ -75,7 +91,7 @@ public class Editor {
                     selectedTile = row * gp.tileManager.tilesetWidth + col;
                 }
             }
-        } else if(isActive){
+        } else if(active){
             editMap();
         }
     }
@@ -91,7 +107,16 @@ public class Editor {
         }
     }
     public void saveMap(){
-        System.out.println("SAVED!!!");
+        int result = JOptionPane.showConfirmDialog(
+                gp,
+                "Are you sure you want to save?",
+                "Confirm Save",
+                JOptionPane.YES_NO_OPTION
+        );
+        if (result != JOptionPane.YES_OPTION) {
+            return;
+        }
+        gp.tileManager.map.saveMap();
     }
     public void mouseDown(MouseEvent e){
         int mouseX = e.getX();
@@ -100,7 +125,7 @@ public class Editor {
                 && mouseX<saveImageX+saveImageSize
                 && mouseY>saveImageY
                 && mouseY<saveImageY+saveImageSize
-                && isActive){
+                && active){
             saveImageClicked = true;
         }
     }
@@ -112,13 +137,13 @@ public class Editor {
                 && mouseY>saveImageY
                 && mouseY<saveImageY+saveImageSize
                 && saveImageClicked
-                && isActive){
+                && active){
             saveMap();
             saveImageClicked = false;
         }
     }
     public void tick(){
-        if(gp.keyH.mouseX>paletteX && isActive && gp.tickCount % 2 == 0){
+        if(gp.keyH.mouseX>paletteX && active && gp.tickCount % 2 == 0){
             if(gp.keyH.upPressed){
                 amountMovedY -= 1;
             }
@@ -152,7 +177,7 @@ public class Editor {
         int contentWidth  = paletteWidth  - paletteOffset*2;
         int contentHeight = gp.screenHeight - paletteOffset;
 
-        if(isActive){
+        if(active){
             g2.setColor(Color.black);
             g2.fillRect(paletteX,0,paletteWidth,gp.screenHeight);
 
