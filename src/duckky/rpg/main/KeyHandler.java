@@ -5,6 +5,7 @@ import java.awt.event.*;
 public class KeyHandler implements KeyListener, MouseListener,MouseMotionListener {
     public boolean upPressed, downPressed, leftPressed, rightPressed;
     public boolean leftMousePressed,middleMousePressed,rightMousePressed;
+    public boolean ePressed;
     public int mouseX,mouseY;
     GamePanel gp;
     private boolean ctrlPressed = false;
@@ -23,6 +24,9 @@ public class KeyHandler implements KeyListener, MouseListener,MouseMotionListene
 
         if(code == KeyEvent.VK_CONTROL){
             ctrlPressed = true;
+        }
+        if(code == KeyEvent.VK_E){
+            ePressed = true;
         }
 
         if(code == KeyEvent.VK_W){
@@ -62,6 +66,9 @@ public class KeyHandler implements KeyListener, MouseListener,MouseMotionListene
             if(code == KeyEvent.VK_3){
                 gp.editor.selectedLayer = 3;
             }
+            if(code == KeyEvent.VK_Z){
+                gp.editor.selectedTile = -1;
+            }
         }
     }
 
@@ -71,6 +78,9 @@ public class KeyHandler implements KeyListener, MouseListener,MouseMotionListene
 
         if(code == KeyEvent.VK_CONTROL){
             ctrlPressed = false;
+        }
+        if(code == KeyEvent.VK_E){
+            ePressed = false;
         }
         if(code == KeyEvent.VK_W){
             upPressed = false;

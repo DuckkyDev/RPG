@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 
 public class Editor {
     GamePanel gp;
-    SpriteSheet uiSpriteSheet = new SpriteSheet("/ui/ui.png");
+    SpriteSheet uiSpriteSheet;
     BufferedImage selectionImage;
     BufferedImage transparentImage;
 
@@ -20,6 +20,7 @@ public class Editor {
     int saveImageY;
     int saveImageSize;
     boolean saveImageClicked = false;
+    boolean isLoadingZoneTileClicked = false;
 
     boolean runningFromJar = Editor.class
             .getProtectionDomain()
@@ -50,6 +51,7 @@ public class Editor {
         setDefaultValues();
     }
     void setDefaultValues(){
+        uiSpriteSheet = new SpriteSheet("/ui/ui.png",gp);
         selectionImage = uiSpriteSheet.getSprite(0,0);
         transparentImage = uiSpriteSheet.getSprite(1,0);
         saveImage = uiSpriteSheet.getSprite(2,0);
@@ -71,14 +73,13 @@ public class Editor {
         }
     }
     public void selectTile(){
-        if(!keyHandler.leftMousePressed){
-            return;
-        }
-
         int mouseX = keyHandler.mouseX;
         int mouseY = keyHandler.mouseY;
 
-        if(active && mouseX > paletteX && mouseX < paletteX + paletteWidth) {
+        int worldX = (int) (gp.player.camX + (mouseX - gp.screenWidth  / 2.0) * (1.0 / gp.scale));
+        int worldY = (int) (gp.player.camY + (mouseY - gp.screenHeight  / 2.0) * (1.0 / gp.scale));
+
+        if(active && mouseX > paletteX && mouseX < paletteX + paletteWidth && keyHandler.leftMousePressed) {
             int relX = mouseX - paletteX - paletteOffset;
             int relY = mouseY - paletteOffset;
 
@@ -86,12 +87,15 @@ public class Editor {
                 int col = (relX / paletteTileSize) + amountMovedX;
                 int row = (relY / paletteTileSize) + amountMovedY;
 
-                if (col < gp.tileManager.tilesetWidth
-                        && row < gp.tileManager.tilesetHeight) {
-                    selectedTile = row * gp.tileManager.tilesetWidth + col;
+                if (col < gp.tileManager.getTileset().getWidth()
+                        && row < gp.tileManager.getTileset().getHeight()) {
+                    selectedTile = row * gp.tileManager.getTileset().getWidth() + col;
                 }
             }
         } else if(active){
+            if (keyHandler.ePressed){
+                selectedTile = gp.tileManager.map.getTile(worldX,worldY,selectedLayer);
+            }
             editMap();
         }
     }
@@ -99,24 +103,80 @@ public class Editor {
         int mouseX = keyHandler.mouseX;
         int mouseY = keyHandler.mouseY;
 
+        if(mouseX>saveImageX
+                && mouseX<saveImageX+saveImageSize
+                && mouseY>saveImageY
+                && mouseY<saveImageY+saveImageSize
+                && active){return;}
+
         int worldX = (int) (gp.player.camX + (mouseX - gp.screenWidth  / 2.0) * (1.0 / gp.scale));
         int worldY = (int) (gp.player.camY + (mouseY - gp.screenHeight  / 2.0) * (1.0 / gp.scale));
 
-        if (keyHandler.leftMousePressed){
+        if(keyHandler.leftMousePressed){
             gp.tileManager.map.setTile(worldX,worldY,selectedTile,selectedLayer);
         }
+        if (keyHandler.rightMousePressed && selectedLayer == 2 && !isLoadingZoneTileClicked) {
+            if (gp.tileManager.map.getTile(worldX, worldY, 2) != -1) {
+                return;
+            }
+            try{
+                String targetMapName = JOptionPane.showInputDialog(null, "Enter the name of the targeted map:");
+                if (targetMapName != null && !targetMapName.isBlank()) {
+                    System.out.println("Zone set to: " + targetMapName);
+                } else {
+                    System.out.println("User cancelled or entered nothing.");
+                    return;
+                }
+                String targetPosition = JOptionPane.showInputDialog(gp, "Enter X and Y coordinates (e.g. 10, 20):");
+                if (targetPosition != null && !targetPosition.isBlank()) {
+                    int targetX;
+                    int targetY;
+                    try {
+                        String[] parts = targetPosition.trim().split("[,\\s]+"); // split by comma or whitespace
+                        targetX = Integer.parseInt(parts[0]);
+                        targetY = Integer.parseInt(parts[1]);
+
+                        System.out.println("X: " + targetX + ", Y: " + targetY);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(gp, "Invalid input! Please enter two numbers.");
+                        return;
+                    }
+                    int result = JOptionPane.showConfirmDialog(gp,
+                            "Is this correct:\n" +
+                                    "Targeted Map: " + targetMapName + "\n" +
+                                    "Target Coordinates: (" + targetX + ", " + targetY + ")",
+                            "Confirmation", JOptionPane.YES_NO_OPTION);
+                    if (result != JOptionPane.YES_OPTION) {
+                        return;
+                    }
+                    gp.tileManager.map.addLoadingZone(targetMapName,worldX/gp.originalTileSize,worldY/gp.originalTileSize,targetX,targetY);
+                } else {
+                    System.out.println("User cancelled or entered nothing.");
+                }
+            } finally {
+                isLoadingZoneTileClicked = false;
+                keyHandler.rightMousePressed = false;
+            }
+        }
     }
-    public void saveMap(){
-        int result = JOptionPane.showConfirmDialog(
-                gp,
-                "Are you sure you want to save?",
-                "Confirm Save",
-                JOptionPane.YES_NO_OPTION
-        );
-        if (result != JOptionPane.YES_OPTION) {
-            return;
+    public void saveMap(boolean showConfirmation){
+        if(runningFromJar){return;}
+        if(showConfirmation){
+            int result = JOptionPane.showConfirmDialog(
+                    gp,
+                    "Are you sure you want to save?",
+                    "Confirm Save",
+                    JOptionPane.YES_NO_OPTION
+            );
+            if (result != JOptionPane.YES_OPTION) {
+                return;
+            }
         }
         gp.tileManager.map.saveMap();
+        gp.tileManager.map.saveLoadingZones();
+    }
+    public void saveMap(){
+        saveMap(true);
     }
     public void mouseDown(MouseEvent e){
         int mouseX = e.getX();
@@ -157,8 +217,8 @@ public class Editor {
                 amountMovedX -= 1;
             }
         }
-        int maxMoveX = Math.max(0, gp.tileManager.tilesetWidth - tilesPerRow);
-        int maxMoveY = Math.max(0, gp.tileManager.tilesetHeight - (gp.screenHeight / paletteTileSize));
+        int maxMoveX = Math.max(0, gp.tileManager.getTileset().getWidth() - tilesPerRow);
+        int maxMoveY = Math.max(0, gp.tileManager.getTileset().getHeight() - (gp.screenHeight / paletteTileSize));
 
         if (amountMovedX < 0) {
             amountMovedX = 0;
@@ -197,8 +257,8 @@ public class Editor {
             }
 
             for(int i = 0; i < gp.tileManager.amountOfTiles; i++) {
-                int x = i % gp.tileManager.tilesetWidth;
-                int y = i / gp.tileManager.tilesetHeight;
+                int x = i % gp.tileManager.getTileset().getWidth();
+                int y = i / gp.tileManager.getTileset().getHeight();
 
                 x *= paletteTileSize;
                 y *= paletteTileSize;
@@ -217,7 +277,7 @@ public class Editor {
                             null
                     );
                     g2.drawImage(
-                            gp.tileManager.tile[i].image,
+                            gp.tileManager.getTile(i).image,
                             paletteX + paletteOffset + x,
                             paletteOffset + y,
                             paletteTileSize,

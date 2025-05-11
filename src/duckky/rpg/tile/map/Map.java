@@ -2,10 +2,7 @@ package duckky.rpg.tile.map;
 
 import duckky.rpg.main.GamePanel;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +13,7 @@ import java.util.List;
 
 
 public class Map {
+    private final List<LoadingZone> loadingZones = new ArrayList<>();
     String mapName;
     GamePanel gp;
     private Layer layer1;
@@ -26,6 +24,75 @@ public class Map {
         this.mapName = mapName;
         this.gp = gp;
         loadMap();
+        readLoadingZones();
+    }
+    public void addLoadingZone(String targetMap, int x, int y, int spawnX, int spawnY){
+        loadingZones.removeIf(zone -> zone.x == x && zone.y == y);
+        loadingZones.add(new LoadingZone(gp, targetMap, x, y, spawnX, spawnY));
+    }
+    public List<LoadingZone> getLoadingZones(){
+        return loadingZones;
+    }
+    public void readLoadingZones(){
+        loadingZones.clear();
+        try{
+            InputStream inputStream = getClass().getResourceAsStream("/maps/"+mapName+"/loadingZones.txt");
+            if (inputStream == null) {
+                System.err.println("No loadingZones.txt for map " + mapName);
+                return;
+            }
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+            List<String> lines = new ArrayList<>();
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                lines.add(line);
+            }
+            bufferedReader.close();
+
+            if (!lines.isEmpty()) {
+                for(String zoneData : lines){
+                    String[] arguments = zoneData.split(" ");
+                    if (arguments.length == 5) {
+                        loadingZones.add(new LoadingZone(
+                                gp, //map name
+                                arguments[0], //Target Map Name
+                                Integer.parseInt(arguments[1]), //x
+                                Integer.parseInt(arguments[2]), //y
+                                Integer.parseInt(arguments[3]), //spawnX
+                                Integer.parseInt(arguments[4]))); //spawnY
+                    } else {
+                        System.err.println("Loading zone file contains incorrect formatting");
+                    }
+                }
+            } else {
+                System.err.println("Warning: Loading zone file is empty.");
+            }
+        } catch (IOException e) {
+            System.err.println("Error loading loadingZones.txt for map " + mapName + ": " + e.getMessage());
+        }
+
+    }
+    public void saveLoadingZones() {
+        try {
+            Path out = Paths.get(System.getProperty("user.dir"),
+                    "res", "maps", mapName, "loadingZones.txt");
+            if (!Files.exists(out)) {
+                Files.createFile(out);
+            }
+            try (BufferedWriter bw = Files.newBufferedWriter(out)) {
+                for (LoadingZone loadingZone : loadingZones) {
+                    bw.write(loadingZone.targetMap + " "
+                            + loadingZone.x + " "
+                            + loadingZone.y + " "
+                            + loadingZone.spawnX + " "
+                            + loadingZone.spawnY);
+                    bw.newLine();
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Unable to save loading zones...");
+        }
     }
     public void setTile(int x, int y, int tile, int layerNumber){
         Layer layer = switch (layerNumber) {

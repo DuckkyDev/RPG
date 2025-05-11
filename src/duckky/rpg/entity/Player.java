@@ -3,6 +3,7 @@ package duckky.rpg.entity;
 import duckky.rpg.gfx.SpriteSheet;
 import duckky.rpg.main.GamePanel;
 import duckky.rpg.main.KeyHandler;
+import duckky.rpg.tile.map.LoadingZone;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -10,7 +11,7 @@ import java.awt.image.BufferedImage;
 public class Player extends Entity{
     GamePanel gp;
     KeyHandler keyH;
-    SpriteSheet spriteSheet = new SpriteSheet("/player/player_sprite_sheet.png");
+    SpriteSheet spriteSheet;
 
     public int camX;
     public int camY;
@@ -29,6 +30,7 @@ public class Player extends Entity{
         y = 32;
         speed = 96; //Pixels per second
         direction = Direction.DOWN;
+        spriteSheet = new SpriteSheet("/player/player_sprite_sheet.png",gp);
 
         moveCamera();
     }
@@ -121,11 +123,24 @@ public class Player extends Entity{
 
         Rectangle playerBox = new Rectangle(leftX, topY, hitbox.width, hitbox.height);
 
+        for(LoadingZone loadingZone : gp.tileManager.map.getLoadingZones()){
+            if(playerBox.intersects(loadingZone.area)){
+                if(gp.editor.isActive()){
+                    return true;
+                }
+                gp.editor.saveMap(false);
+                gp.tileManager.loadNewMap(
+                        loadingZone.targetMap,
+                        loadingZone.spawnX,
+                        loadingZone.spawnY
+                );
+            }
+        }
         for (int row = topRow; row <= bottomRow; row++) {
             for (int col = leftCol; col <= rightCol; col++) {
                 int tileNum = gp.tileManager.map.getTile(col * tileSize, row * tileSize, 2);
 
-                Rectangle tileBox = gp.tileManager.tile[tileNum].collisionBox;
+                Rectangle tileBox = gp.tileManager.getTile(tileNum).collisionBox;
 
                 if (tileBox != null) {
                     int tileWorldX = col * tileSize;
