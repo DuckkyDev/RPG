@@ -35,11 +35,51 @@ public class Player extends Entity{
         moveCamera();
     }
     public void moveCamera(){
-        camX = x;
-        camY = y;
-        if(gp.editor.isActive()){
-            camX += (int) ((gp.editor.paletteWidth / gp.scale)/2);
+        float desiredCamX = x;
+        float desiredCamY = y;
+        if (gp.editor.isActive()) {
+            camX = (int) (desiredCamX + ((gp.editor.paletteWidth / gp.scale) / 2f));
+            camY = (int) desiredCamY;
+            return;
         }
+
+        // 2) Dimensions in world‐pixels
+        int mapPixelW = gp.tileManager.map.width()  * gp.originalTileSize;
+        int mapPixelH = gp.tileManager.map.height() * gp.originalTileSize;
+        float viewW   = (float) (gp.screenWidth  / gp.scale);
+        float viewH   = (float) (gp.screenHeight / gp.scale);
+        float halfW   = viewW  / 2f;
+        float halfH   = viewH  / 2f;
+
+        // Calculate min and max camera positions with inset
+        // The camera's center should be at least (inset + halfW) from world origin
+        float minCamXWithInset = gp.originalTileSize + halfW;
+        float maxCamXWithInset = mapPixelW - gp.originalTileSize - halfW;
+        float minCamYWithInset = gp.originalTileSize + halfH;
+        float maxCamYWithInset = mapPixelH - gp.originalTileSize - halfH;
+
+        // Clamp desiredCamX
+        if (mapPixelW < viewW) { // If map is narrower than the view, just center it
+            // This case handles maps smaller than the screen width.
+            // We want the entire map to be visible, so the camera should center the map.
+            desiredCamX = mapPixelW / 2.0f;
+        } else { // Otherwise, apply regular clamping with inset
+            desiredCamX = Math.max(desiredCamX, minCamXWithInset);
+            desiredCamX = Math.min(desiredCamX, maxCamXWithInset);
+        }
+
+        // Clamp desiredCamY
+        if (mapPixelH < viewH) { // If map is shorter than the view, just center it
+            // This case handles maps smaller than the screen height.
+            // We want the entire map to be visible, so the camera should center the map.
+            desiredCamY = mapPixelH / 2.0f;
+        } else { // Otherwise, apply regular clamping with inset
+            desiredCamY = Math.max(desiredCamY, minCamYWithInset);
+            desiredCamY = Math.min(desiredCamY, maxCamYWithInset);
+        }
+
+        camX = (int) desiredCamX;
+        camY = (int) desiredCamY;
     }
     public void tryMove(){
         double secondsPerUpdate = 1.0 / gp.targetFPS;
